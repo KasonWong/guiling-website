@@ -46,12 +46,15 @@ function GlobalParticles() {
     window.addEventListener('mouseleave', onLeave)
 
     const COUNT = 90
-    type P = { x: number; y: number; vx: number; vy: number; r: number; ox: number; oy: number }
-    const pts: P[] = Array.from({ length: COUNT }, () => {
-      const vx = (Math.random() - 0.5) * 0.45
-      const vy = (Math.random() - 0.5) * 0.45
-      return { x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx, vy, r: Math.random() * 1.8 + 0.5, ox: vx, oy: vy }
-    })
+    type P = { x: number; y: number; vx: number; vy: number; r: number }
+    const pts: P[] = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      // fixed base speed — never changes, so density stays constant forever
+      vx: (Math.random() - 0.5) * 0.45 || 0.1,
+      vy: (Math.random() - 0.5) * 0.45 || 0.1,
+      r: Math.random() * 1.8 + 0.5,
+    }))
 
     const LINK = 150
     const MR = 200 // mouse radius
@@ -78,14 +81,13 @@ function GlobalParticles() {
         }
       }
 
-      // Mouse → particle beams
+      // Mouse → particle beams (purely visual, does NOT modify particle velocity)
       pts.forEach((p) => {
         const dx = p.x - mx
         const dy = p.y - my
         const d = Math.hypot(dx, dy)
         if (d < MR) {
           const t = 1 - d / MR
-          // beam line
           ctx.beginPath()
           const grad = ctx.createLinearGradient(mx, my, p.x, p.y)
           grad.addColorStop(0, `rgba(139,92,246,${t * 0.75})`)
@@ -95,10 +97,6 @@ function GlobalParticles() {
           ctx.moveTo(mx, my)
           ctx.lineTo(p.x, p.y)
           ctx.stroke()
-          // repel
-          const angle = Math.atan2(dy, dx)
-          p.vx += Math.cos(angle) * t * 0.06
-          p.vy += Math.sin(angle) * t * 0.06
         }
       })
 
@@ -113,7 +111,7 @@ function GlobalParticles() {
         ctx.fill()
       }
 
-      // Particles
+      // Particles — move at constant velocity, bounce at edges
       pts.forEach((p) => {
         const d = Math.hypot(p.x - mx, p.y - my)
         const near = d < MR
@@ -124,15 +122,11 @@ function GlobalParticles() {
         ctx.fillStyle = near ? `rgba(167,139,250,${0.5 + t * 0.5})` : 'rgba(139,92,246,0.45)'
         ctx.fill()
 
-        // Return to base velocity + damp
-        p.vx = p.vx * 0.97 + p.ox * 0.03
-        p.vy = p.vy * 0.97 + p.oy * 0.03
-        const spd = Math.hypot(p.vx, p.vy)
-        if (spd > 2.5) { p.vx *= 2.5 / spd; p.vy *= 2.5 / spd }
-
-        p.x += p.vx; p.y += p.vy
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+        // Constant velocity — no damping, no modification
+        p.x += p.vx
+        p.y += p.vy
+        if (p.x < 0 || p.x > canvas.width)  { p.vx *= -1; p.x = Math.max(0, Math.min(canvas.width,  p.x)) }
+        if (p.y < 0 || p.y > canvas.height) { p.vy *= -1; p.y = Math.max(0, Math.min(canvas.height, p.y)) }
       })
 
       raf.current = requestAnimationFrame(draw)
@@ -519,25 +513,24 @@ function AICapabilities() {
       <DotGrid opacity={0.18} />
       <Glow className="top-1/3 right-0 translate-x-1/2" w={500} h={600} blur={160} color="139,92,246" opacity={0.05} />
       <Container className="relative" style={{ zIndex: 3 } as React.CSSProperties}>
-        <motion.div variants={fadeUp} className="mb-16">
+        <motion.div variants={fadeUp} style={{ marginBottom: 52 }}>
           <Eyebrow>AI 能力</Eyebrow>
-          <H2 className="mb-3">AI 不只是工具<br />而是增长系统</H2>
+          <H2 style={{ marginBottom: 14 }}>AI 不只是工具<br />而是增长系统</H2>
           <p className="text-[13px] text-slate-500 font-light">四步闭环，从数据到落地的完整增长路径</p>
         </motion.div>
-        {/* Flow grid — no translate on hover to avoid overlap within connected grid */}
         <div className="grid md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl border border-white/[0.06] overflow-hidden">
           {flow.map((s, i) => (
             <motion.div key={s.n} variants={slide(i * 0.1)}>
-              <div className="group bg-[#06060a]/90 h-full flex flex-col gap-6 hover:bg-indigo-600/[0.09] transition-colors duration-300 cursor-default"
-                style={{ padding: '36px 26px' }}>
+              <div className="group bg-[#06060a]/90 h-full flex flex-col hover:bg-indigo-600/[0.09] transition-colors duration-300 cursor-default"
+                style={{ padding: '36px 28px', gap: 22 }}>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-indigo-500/50 tracking-[0.2em] group-hover:text-indigo-400/85 transition-colors duration-300">{s.n}</span>
                   {i < flow.length - 1 && <ChevronRight size={11} className="text-white/10 hidden md:block group-hover:text-indigo-400/50 transition-colors duration-300" />}
                 </div>
                 <IconBox icon={s.icon} color="indigo" sm />
                 <div>
-                  <h3 className="text-[13px] font-semibold text-white/85 mb-2.5 group-hover:text-white transition-colors duration-300">{s.title}</h3>
-                  <p className="text-[12px] text-slate-500 leading-[1.85] font-light group-hover:text-slate-400 transition-colors duration-300">{s.desc}</p>
+                  <h3 className="text-[13px] font-semibold text-white/85 group-hover:text-white transition-colors duration-300" style={{ marginBottom: 10 }}>{s.title}</h3>
+                  <p className="text-[12px] text-slate-500 leading-[1.9] font-light group-hover:text-slate-400 transition-colors duration-300">{s.desc}</p>
                 </div>
               </div>
             </motion.div>
@@ -565,19 +558,22 @@ function Services() {
     <Section id="services" style={{ zIndex: 2 } as React.CSSProperties}>
       <Glow className="bottom-0 left-1/3 translate-y-1/3" w={500} h={500} blur={140} color="99,102,241" opacity={0.06} />
       <Container className="relative" style={{ zIndex: 3 } as React.CSSProperties}>
-        <motion.div variants={fadeUp} className="mb-16">
+        <motion.div variants={fadeUp} style={{ marginBottom: 52 }}>
           <Eyebrow>服务模块</Eyebrow>
-          <H2 className="mb-3">覆盖增长全链路的服务体系</H2>
+          <H2 style={{ marginBottom: 14 }}>覆盖增长全链路的服务体系</H2>
           <p className="text-[13px] text-slate-500 font-light">从洞察到落地，每个环节都有对应的 AI 能力支撑</p>
         </motion.div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 relative">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 relative" style={{ gap: 16 }}>
           {services.map((s, i) => (
             <motion.div key={s.title} variants={slide(i * 0.08)} className="relative hover:z-10">
-              <Card className="flex flex-col gap-5 h-full" style={{ padding: '28px 26px' }}>
+              <Card className="h-full flex flex-col" style={{ padding: '28px 26px', gap: 20 }}>
                 <IconBox icon={s.icon} color="indigo" sm />
                 <div>
-                  <h3 className="text-[13px] font-semibold text-white/88 mb-2.5 group-hover:text-indigo-300 transition-colors duration-300">{s.title}</h3>
-                  <p className="text-[12px] text-slate-500 leading-[1.85] font-light group-hover:text-slate-400 transition-colors duration-300">{s.desc}</p>
+                  <h3
+                    className="text-[13px] font-semibold text-white/88 group-hover:text-indigo-300 transition-colors duration-300"
+                    style={{ marginBottom: 10 }}
+                  >{s.title}</h3>
+                  <p className="text-[12px] text-slate-500 leading-[1.9] font-light group-hover:text-slate-400 transition-colors duration-300">{s.desc}</p>
                 </div>
               </Card>
             </motion.div>
@@ -605,12 +601,12 @@ function SampleOutputs() {
       <DotGrid opacity={0.16} />
       <Glow className="top-1/2 right-0 -translate-y-1/2 translate-x-1/3" w={450} h={650} blur={160} color="139,92,246" opacity={0.045} />
       <Container className="relative" style={{ zIndex: 3 } as React.CSSProperties}>
-        <div className="grid md:grid-cols-[1fr_1.45fr] gap-20 md:gap-28 items-center">
+        <div className="grid md:grid-cols-[1fr_1.45fr] items-center" style={{ gap: '0 96px' }}>
           {/* Left */}
           <motion.div variants={fadeUp}>
             <Eyebrow>示例输出</Eyebrow>
-            <H2 className="mb-5">AI 输出的<br />不是报告<br />是决策依据</H2>
-            <p className="text-[13px] text-slate-500 leading-[1.9] font-light mb-8" style={{ maxWidth: 280 }}>
+            <H2 style={{ marginBottom: 20 }}>AI 输出的<br />不是报告<br />是决策依据</H2>
+            <p className="text-[13px] text-slate-500 leading-[1.9] font-light" style={{ maxWidth: 260, marginBottom: 28 }}>
               每一份输出都直接对应一个业务判断，不产生无效信息噪声。
             </p>
             <p className="text-[11px] text-slate-700 flex items-center gap-1.5">
@@ -618,16 +614,18 @@ function SampleOutputs() {
               示例数据，实际分析结果因品牌情况而异
             </p>
           </motion.div>
-          {/* Right — relative+z-index on each row prevents hover overlap */}
-          <div className="flex flex-col gap-3">
+          {/* Right */}
+          <div className="flex flex-col" style={{ gap: 10 }}>
             {outputs.map((o, i) => (
               <motion.div key={o.label} variants={slide(i * 0.09)} className="relative hover:z-10">
-                <div className="group rounded-xl border border-white/[0.055] bg-white/[0.015] transition-all duration-300 hover:border-indigo-400/40 hover:bg-indigo-500/[0.07] hover:shadow-[0_6px_28px_-8px_rgba(99,102,241,0.35)]"
-                  style={{ padding: '18px 20px' }}>
-                  <span className="inline-block text-[9px] font-semibold tracking-[0.16em] uppercase text-indigo-400/60 border border-indigo-500/18 bg-indigo-500/7 rounded group-hover:text-indigo-300/85 group-hover:border-indigo-400/40 transition-all duration-300"
-                    style={{ padding: '3px 8px', marginBottom: 11 }}>
-                    {o.label}
-                  </span>
+                <div
+                  className="group rounded-xl border border-white/[0.055] bg-white/[0.015] transition-all duration-300 hover:border-indigo-400/40 hover:bg-indigo-500/[0.07] hover:shadow-[0_6px_28px_-8px_rgba(99,102,241,0.35)]"
+                  style={{ padding: '16px 20px' }}
+                >
+                  <span
+                    className="inline-block text-[9px] font-semibold tracking-[0.16em] uppercase text-indigo-400/60 border border-indigo-500/18 bg-indigo-500/7 rounded group-hover:text-indigo-300/85 group-hover:border-indigo-400/40 transition-all duration-300"
+                    style={{ padding: '3px 8px', display: 'inline-block', marginBottom: 10 }}
+                  >{o.label}</span>
                   <p className="text-[12px] text-slate-400/80 leading-[1.8] font-light group-hover:text-slate-300 transition-colors duration-300">{o.content}</p>
                 </div>
               </motion.div>
@@ -653,23 +651,23 @@ function Results() {
     <Section id="results" style={{ zIndex: 2 } as React.CSSProperties}>
       <Glow className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" w={800} h={600} blur={180} color="99,102,241" opacity={0.06} />
       <Container className="relative text-center" style={{ zIndex: 3 } as React.CSSProperties}>
-        <motion.div variants={fadeUp} className="mb-20">
+        <motion.div variants={fadeUp} style={{ marginBottom: 56 }}>
           <Eyebrow>参考成果</Eyebrow>
-          <H2 className="mb-4">效率的量级差</H2>
-          <p className="text-[13px] text-slate-500 font-light mb-3">三项核心指标的可量化提升</p>
+          <H2 style={{ marginBottom: 14 }}>效率的量级差</H2>
+          <p className="text-[13px] text-slate-500 font-light" style={{ marginBottom: 10 }}>三项核心指标的可量化提升</p>
           <p className="text-[11px] text-slate-700 flex items-center justify-center gap-1.5">
             <AlertCircle size={10} className="flex-shrink-0" /> 以下为示例参考数据
           </p>
         </motion.div>
-        <div className="grid md:grid-cols-3 gap-5 relative">
+        <div className="grid md:grid-cols-3 relative" style={{ gap: 20 }}>
           {stats.map((s, i) => (
             <motion.div key={s.label} variants={slide(i * 0.12)} className="relative hover:z-10">
-              <Card glow={i === 1} className="flex flex-col items-center text-center" style={{ padding: '52px 32px', gap: 20 }}>
+              <Card glow={i === 1} className="flex flex-col items-center text-center" style={{ padding: '48px 32px', gap: 22 }}>
                 <IconBox icon={s.icon} color="indigo" />
                 <div className="text-[4.2rem] font-black bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent tracking-[-0.04em] leading-none group-hover:from-indigo-200 group-hover:to-violet-300 transition-all duration-500">{s.value}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div className="text-[13px] font-semibold text-white/85 group-hover:text-white transition-colors duration-300">{s.label}</div>
-                  <div className="text-[11px] text-slate-600 font-light group-hover:text-slate-500 transition-colors duration-300">{s.sub}</div>
+                  <div className="text-[12px] text-slate-600 font-light group-hover:text-slate-500 transition-colors duration-300">{s.sub}</div>
                 </div>
               </Card>
             </motion.div>
@@ -692,15 +690,17 @@ function CTA() {
       <div className="relative flex flex-col items-center justify-center text-center flex-1" style={{ zIndex: 3, padding: '0 24px' }}>
         <motion.div variants={fadeUp} className="max-w-xl mx-auto">
           <Eyebrow>开始增长</Eyebrow>
-          <h2 className="font-bold text-white leading-[1.06] tracking-[-0.04em] mb-5"
-            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.2rem)' }}>
+          <h2
+            className="font-bold text-white leading-[1.06] tracking-[-0.04em]"
+            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.2rem)', marginBottom: 20 }}
+          >
             从归零开始
             <br />
             <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-purple-300 bg-clip-text text-transparent">
               重做品牌增长
             </span>
           </h2>
-          <p className="text-[14px] text-slate-500 leading-relaxed font-light" style={{ marginBottom: 40 }}>
+          <p className="text-[14px] text-slate-500 leading-[1.85] font-light" style={{ marginBottom: 44 }}>
             用更快、更准、更稳的方法，找到下一次增长机会。
           </p>
           <PrimaryBtn href="mailto:hello@guiling.ai">
