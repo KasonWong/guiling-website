@@ -190,11 +190,10 @@ function Card({ children, className = '', glow = false, style }:
   return (
     <div style={style}
       className={[
-        'rounded-2xl border border-white/[0.07] bg-white/[0.02]',
+        'rounded-2xl border border-white/[0.08] bg-white/[0.05] backdrop-blur-md',
         'transition-all duration-300 group cursor-default',
-        'hover:border-indigo-400/45 hover:bg-indigo-500/[0.07]',
+        'hover:border-indigo-400/45 hover:bg-indigo-500/[0.1]',
         'hover:shadow-[0_6px_32px_-8px_rgba(99,102,241,0.4)]',
-        // translate handled by parent wrapper (hover:z-10 relative) to avoid overlap
         glow ? 'shadow-[0_0_50px_-15px_rgba(99,102,241,0.35)]' : '',
         className,
       ].join(' ')}>
@@ -276,9 +275,9 @@ function Nav() {
       style={{ zIndex: 100, padding: '0 44px' }}>
       <div className="flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.5)]">
-          <span className="text-white text-[10px] font-black">归</span>
+          <span className="text-white text-[9px] font-black tracking-tight">DL</span>
         </div>
-        <span className="text-[13px] font-semibold text-white/85 tracking-wide">归零工作室</span>
+        <span className="text-[13px] font-semibold text-white/85 tracking-wide">DalingLab · 归零增长系统</span>
       </div>
 
       <div className="hidden md:flex items-center gap-8 text-[13px] text-slate-500">
@@ -461,7 +460,7 @@ function Methodology() {
           {methods.map((m, i) => (
             <motion.div key={m.word} variants={slide(i * 0.11)} className="relative hover:z-10">
               <div
-                className={`group rounded-2xl border bg-gradient-to-b ${m.bg} ${m.border} ${m.hoverShadow}
+                className={`group rounded-2xl border bg-gradient-to-b backdrop-blur-md ${m.bg} ${m.border} ${m.hoverShadow}
                   h-full transition-all duration-300 hover:bg-white/[0.04] hover:-translate-y-1`}
                 style={{ padding: '36px 30px' }}
               >
@@ -521,7 +520,7 @@ function AICapabilities() {
         <div className="grid md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl border border-white/[0.06] overflow-hidden">
           {flow.map((s, i) => (
             <motion.div key={s.n} variants={slide(i * 0.1)}>
-              <div className="group bg-[#06060a]/90 h-full flex flex-col hover:bg-indigo-600/[0.09] transition-colors duration-300 cursor-default"
+              <div className="group bg-[#06060a]/90 backdrop-blur-md h-full flex flex-col hover:bg-indigo-600/[0.09] transition-colors duration-300 cursor-default"
                 style={{ padding: '36px 28px', gap: 22 }}>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-indigo-500/50 tracking-[0.2em] group-hover:text-indigo-400/85 transition-colors duration-300">{s.n}</span>
@@ -619,7 +618,7 @@ function SampleOutputs() {
             {outputs.map((o, i) => (
               <motion.div key={o.label} variants={slide(i * 0.09)} className="relative hover:z-10">
                 <div
-                  className="group rounded-xl border border-white/[0.055] bg-white/[0.015] transition-all duration-300 hover:border-indigo-400/40 hover:bg-indigo-500/[0.07] hover:shadow-[0_6px_28px_-8px_rgba(99,102,241,0.35)]"
+                  className="group rounded-xl border border-white/[0.08] bg-white/[0.05] backdrop-blur-md transition-all duration-300 hover:border-indigo-400/40 hover:bg-indigo-500/[0.09] hover:shadow-[0_6px_28px_-8px_rgba(99,102,241,0.35)]"
                   style={{ padding: '16px 20px' }}
                 >
                   <span
@@ -716,7 +715,7 @@ function CTA() {
             <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
               <span className="text-white text-[9px] font-black">归</span>
             </div>
-            <span className="text-[12px] text-white/50 font-medium">归零工作室</span>
+            <span className="text-[12px] text-white/50 font-medium">DalingLab · 归零增长系统</span>
           </div>
           <p className="text-[11px] text-slate-700">AI 数字化咨询 · 服务茶饮 / 餐饮 / 零售品牌</p>
           <p className="text-[11px] text-slate-700">帮助品牌多赚钱、少试错</p>
