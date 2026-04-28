@@ -469,7 +469,7 @@ function Methodology() {
 
                 {/* Decorative character */}
                 <div
-                  className={`text-[4.2rem] font-black leading-none bg-gradient-to-br ${m.wFrom} ${m.wTo} bg-clip-text text-transparent opacity-[0.15] group-hover:opacity-[0.28] transition-opacity duration-300`}
+                  className={`text-[4.2rem] font-black leading-none bg-gradient-to-br ${m.wFrom} ${m.wTo} bg-clip-text text-transparent opacity-[0.4] group-hover:opacity-[0.6] transition-opacity duration-300`}
                   style={{ marginTop: 28, marginBottom: 20 }}
                 >
                   {m.word}
