@@ -27,6 +27,8 @@ html, body {
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* Each snap section */
