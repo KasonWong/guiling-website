@@ -44,6 +44,21 @@ html, body {
   justify-content: center;
 }
 
+/* ── Mobile: let sections grow beyond one screen ───────────────────── */
+@media (max-width: 767px) {
+  .snap-container {
+    scroll-snap-type: y proximity;
+  }
+  .snap-section {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    scroll-snap-stop: normal;
+    padding-top: 72px;
+    padding-bottom: 48px;
+  }
+}
+
 /* Scrollbar */
 .snap-container::-webkit-scrollbar {
   width: 4px;
